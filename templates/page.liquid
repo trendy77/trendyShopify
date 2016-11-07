@@ -1,0 +1,22 @@
+{% if settings.products_featured_collection != blank %}
+  {% if collections[settings.products_featured_collection].products_count != 0 %}
+    {% assign sidebar_enable = true %}
+  {% endif %}
+{% endif %}
+
+<h1 class="small--text-center">{{ page.title }}</h1>
+
+<div class="grid">
+  <div class="grid__item{% if sidebar_enable %} medium-up--three-quarters large-up--four-fifths{% endif %}">
+    <div class="content-block content-block--large">
+      <div class="rte rte--indented-images">
+        {{ page.content }}
+      </div>
+    </div>
+  </div>
+  {% if sidebar_enable %}
+    <div class="grid__item medium-up--one-quarter large-up--one-fifth small--hide">
+      {% include 'featured-products' %}
+    </div>
+  {% endif %}
+</div>

@@ -1,0 +1,354 @@
+{% if settings.hero_enable %}
+  {% comment %}
+    Close .page-width wrapper div
+  {% endcomment %}
+  </div>
+  <div class="hero-wrapper">
+    <button type="button" class="visually-hidden hero__pause" aria-live="polite">
+      <span class="hero__pause-stop">
+        {% include 'icon-pause' %}
+        <span class="icon__fallback-text">{{ 'homepage.hero.pause_slideshow' | t }}</span>
+      </span>
+      <span class="hero__pause-play">
+        {% include 'icon-play' %}
+        <span class="icon__fallback-text">{{ 'homepage.hero.play_slideshow' | t }}</span>
+      </span>
+    </button>
+    <div class="hero" id="Hero" data-autoplay="true" data-speed="7000">
+      {% for i in (1..6) %}
+        {% capture slide %}hero_slide_{{ i }}_enable{% endcapture %}
+        {% capture slide_img %}hero_slide_{{ i }}.jpg{% endcapture %}
+        {% capture slide_heading %}hero_slide_{{ i }}_heading{% endcapture %}
+        {% capture slide_cta %}hero_slide_{{ i }}_cta{% endcapture %}
+        {% capture slide_link %}hero_slide_{{ i }}_link{% endcapture %}
+        {% if settings[slide] %}
+          <div class="hero__slide">
+
+            <style>
+              @media screen and (max-width: 600px) {
+                .hero__image--{{ i }} {
+                  background-image: url('{{ slide_img | asset_img_url: 'grande' }}');
+                }
+              }
+              @media screen and (min-width: 601px) and (max-width: 1024px) {
+                .hero__image--{{ i }} {
+                  background-image: url('{{ slide_img | asset_img_url: '1024x1024' }}');
+                }
+              }
+              @media screen and (min-width: 1025px) {
+                .hero__image--{{ i }} {
+                  background-image: url('{{ slide_img | asset_img_url: '2048x2048' }}');
+                }
+              }
+            </style>
+
+            <div class="hero__image hero__image--{{ i }}" data-image="{{ slide_img | asset_url }}"></div>
+            <div class="hero__text-wrap">
+              <div class="page-width">
+                <div class="hero__text-content">
+                  {% unless settings[slide_heading] == blank %}
+                    <div class="hero__title-wrap">
+                      <h2 class="h1 hero__title{% if settings[slide_link] != blank %} hero__title--has-link{% endif %}">
+                        {% if settings[slide_link] != blank %}
+                          <a href="{{ settings[slide_link] }}" class="hero__link">
+                        {% endif %}
+                        {{ settings[slide_heading] }}
+                        {% if settings[slide_link] != blank %}
+                          </a>
+                        {% endif %}
+                      </h2>
+                    </div>
+                  {% endunless %}
+                  <div class="hero__arrows small--hide" aria-controls="Hero">
+                    <a href="#" class="hero__arrow hero__arrow--prev">
+                      {% include 'icon-arrow-left' %}
+                      <span class="icon__fallback-text">{{ 'homepage.hero.previous_slide' | t }}</span>
+                    </a>
+                    <a href="#" class="hero__arrow hero__arrow--next">
+                      {% include 'icon-arrow-right' %}
+                      <span class="icon__fallback-text">{{ 'homepage.hero.next_slide' | t }}</span>
+                    </a>
+                  </div>
+
+                  {% unless settings[slide_cta] == blank %}
+                    {% if settings[slide_link] != blank %}
+                      <a href="{{ settings[slide_link] }}" class="hero__subtitle hero__link">
+                        {{ settings[slide_cta] }}
+                      </a>
+                    {% else %}
+                      <span class="hero__subtitle">
+                        {{ settings[slide_cta] }}
+                      </span>
+                    {% endif %}
+                  {% endunless %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% comment %}
+    Reopen .page-width div
+  {% endcomment %}
+  <div class="page-width">
+{% endif %}
+
+<div class="medium-up--hide">
+  <ul class="drawer__nav drawer__nav--template-index{% if settings.show_mobile_featured_collection or settings.show_mobile_featured_product %} drawer__nav--margin{% endif %}">
+    {% assign meganav_index = 0 %}
+    {% for link in linklists.main-menu.links %}
+      {% assign child_list_handle = link.title | handleize %}
+      {% assign nav_parent_product_count = link.object.products_count %}
+      {% if link.url == '/' %}
+        {% continue %}
+      {% endif %}
+      {% assign meganav_index = meganav_index | plus: 1 %}
+      {% if linklists[child_list_handle].links != blank %}
+        <li class="drawer__nav-item">
+          <div class="drawer__nav-has-sublist">
+            <a href="{{ link.url }}" class="drawer__nav-link" id="DrawerLabel-{{ child_list_handle }}">{{ link.title }}</a>
+              <div class="drawer__nav-toggle">
+                <button type="button" data-aria-controls="IndexLinklist-{{ child_list_handle }}" class="text-link drawer__nav-toggle-btn index__meganav-toggle{% if meganav_index == 1 %} meganav--active{% endif %}" {% if meganav_index == 1 %} aria-expanded="true"{% endif %}>
+                  <span class="drawer__nav-toggle--open">
+                    {% include 'icon-plus' %}
+                    <span class="icon__fallback-text">{{ 'general.drawers.expand_sub_menu' | t }}</span>
+                  </span>
+                  <span class="drawer__nav-toggle--close">
+                    {% include 'icon-minus' %}
+                    <span class="icon__fallback-text">{{ 'general.drawers.collapse_sub_menu' | t }}</span>
+                  </span>
+                </button>
+              </div>
+          </div>
+
+          <div class="meganav meganav--index {% if meganav_index == 1 %} meganav--active{% endif %}" id="IndexLinklist-{{ child_list_handle }}" aria-labelledby="DrawerLabel-{{ child_list_handle }}" role="navigation">
+            <ul class="meganav__nav">
+              {% include 'meganav', fixed_width: true, show_title: false, show_links: true, show_products: true %}
+            </ul>
+          </div>
+        </li>
+      {% else %}
+        <li class="drawer__nav-item">
+          <a href="{{ link.url }}" class="drawer__nav-link">{{ link.title }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+</div>
+
+{% if settings.featured_collections_enable %}
+  <div class="index-section {% unless settings.show_mobile_featured_collection %}small--hide{% endunless %}">
+    {% assign featured_collection_count = 0 %}
+    {% for i in (1..6) %}
+      {% assign featured_collection_setting = "home_featured_collections_" | append: i %}
+      {% if settings[featured_collection_setting] != blank %}
+        {% assign featured_collection_count = featured_collection_count | plus: 1 %}
+      {% endif %}
+    {% endfor %}
+
+    {% assign featured_collection_setting = "home_featured_collections_" | append: i %}
+
+    {% case featured_collection_count %}
+      {% when 1 %}
+        {% assign featured_collection_grid_width = 'medium-up--one-half' %}
+      {% when 2 %}
+        {% assign featured_collection_grid_width = 'medium-up--one-half' %}
+      {% when 3 %}
+        {% assign featured_collection_grid_width = 'medium-up--one-third' %}
+      {% when 4 %}
+        {% assign featured_collection_grid_width = 'medium-up--one-quarter' %}
+      {% when 5 %}
+        {% assign featured_collection_grid_width = 'medium-up--one-third' %}
+      {% when 6 %}
+        {% assign featured_collection_grid_width = 'medium-up--one-third' %}
+    {% endcase %}
+
+    {% if featured_collection_count > 0 %}
+      <div class="grid grid--no-gutters">
+        {% for i in (1..6) %}
+          {% assign featured_collection_setting = "home_featured_collections_" | append: i %}
+          {% if settings[featured_collection_setting] != blank %}
+            {% assign featured_collection = collections[settings[featured_collection_setting]] %}
+            {% if featured_collection.image %}
+              {% assign featured_card_image_src = featured_collection.image.src  %}
+            {% else %}
+              {% assign featured_card_image_src = featured_collection.products.first.featured_image %}
+            {% endif %}
+            {% if featured_collection_count == 5 and i > 3 %}
+              {% assign featured_collection_grid_width = 'one-half' %}
+            {% endif %}
+            <div class="grid__item {{ featured_collection_grid_width }}">
+              <a href="{{ featured_collection.url }}" title="{{ 'collections.general.link_title' | t: title: featured_collection.title }}" class="featured-card{% if settings.home_featured_cover_image_enable %} featured-card--cover{% endif %}"{% if settings.home_featured_cover_image_enable %} style="background-image: url('{{ featured_card_image_src | img_url: 'large' }}')"{% endif %}>
+                <div class="featured-card__header">
+                  <p class="h1 featured-card__title">{{ featured_collection.title }}</p>
+                  <span class="featured-card__action">{{ 'collections.general.view_all' | t }}</span>
+                </div>
+                {% unless settings.home_featured_cover_image_enable %}
+                  <div class="featured-card__image-wrapper">
+                    <img src="{{ featured_card_image_src | img_url: 'large' }}" alt="{{ featured_collection.image.alt | escape }}" class="featured-card__image">
+                  </div>
+                {% endunless %}
+              </a>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      {% unless onboardingLoaded %}
+        {% comment %}
+          Only load onboarding styles if they have not already been loaded.
+        {% endcomment %}
+        {{ 'theme-onboarding.css' | global_asset_url | stylesheet_tag }}
+        {% assign onboardingLoaded = true %}
+      {% endunless %}
+      <div class="helper-section">
+        <div class="helper-note">
+          <span class="helper-icon"></span>
+          <h3>{{ 'homepage.onboarding.modal_title' | t }}</h3>
+          <p>{{ 'homepage.onboarding.no_collections_html' | t }}</p>
+          <p><a href="/admin/collections" class="admin-btn-primary">{{ 'homepage.onboarding.add_collection' | t }}</a></p>
+        </div>
+        <div class="grid grid--no-gutters helper-content">
+          {% for i in (1..3) %}
+            {% capture imageUrl %}//cdn.shopify.com/s/images/themes/product-{{ i }}.png{% endcapture %}
+            <div class="grid__item one-third">
+              <a href="/collections" class="featured-card{% if settings.home_featured_cover_image_enable %} featured-card--cover{% endif %}"{% if settings.home_featured_cover_image_enable %} style="background-image: url('{{ imageUrl }}')"{% endif %}>
+                <div class="featured-card__header">
+                  <p class="h1 featured-card__title">{{ 'homepage.onboarding.collection_title' | t }}</p>
+                  <span class="featured-card__action">{{ 'collections.general.view_all' | t }}</span>
+                </div>
+                {% unless settings.home_featured_cover_image_enable %}
+                  <div class="featured-card__image-wrapper">
+                    <img src="{{ imageUrl }}" alt="{{ featured_collection.image.alt | escape }}" class="featured-card__image">
+                  </div>
+                {% endunless %}
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endif %}
+
+{% if settings.home_page_content != blank %}
+  <div class="grid index-section index-section--page-content text-center">
+    <div class="grid__item medium-up--three-fifths medium-up--push-one-fifth">
+      <div class="rte">
+        {{ pages[settings.home_page_content].content }}
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% if settings.featured_products_enable %}
+  <div class="index-section {% unless settings.show_mobile_featured_products %}small--hide{% endunless %}">
+    {% assign featured_product_count = 0 %}
+    {% for i in (1..4) %}
+      {% assign collection_setting = "home_featured_products_" | append: i %}
+      {% assign collection_rows = "home_featured_products_rows_" | append: i %}
+      {% if settings[collection_setting] != blank %}
+        {% assign featured_product_count = featured_product_count | plus: 1 %}
+        {% assign collection_handle = settings[collection_setting] %}
+        {% assign collection_object = collections[collection_handle] %}
+        {% assign collection_rows = settings[collection_rows] %}
+        {% comment %}
+          On mobile, the 5 column grid leaves a straggler when 1 or 3 rows.
+          Hide the straggler according to its index. It's one lower than
+          the number of columns because the fist column is a collection card.
+        {% endcomment %}
+        {% assign product_limit = collection_rows | times: 5 | minus: 1 %}
+        {% case collection_rows %}
+          {% when '1' %}
+             {% assign product_index_hide_on_mobile = 4 %}
+          {% when '3' %}
+             {% assign product_index_hide_on_mobile = 14 %}
+        {% endcase %}
+
+        <div class="grid grid--no-gutters grid--uniform collection">
+          <div class="grid__item small--one-half medium-up--one-fifth collection__cover">
+            {% if collection_object.image %}
+              {% assign collection_image = collection_object | img_url: 'large' %}
+            {% else %}
+              {% assign collection_image = collection_object.products.first | img_url: 'large' %}
+            {% endif %}
+            <a href="{{ collection_object.url }}" class="collection-card" style="background-image: url({{ collection_image }});">
+              <div class="collection-card__meta">
+                <p class="h1 collection-card__title">{{ collection_object.title }}</p>
+                <p class="collection-card__subtext">{{ 'collections.general.view_all' | t }}</p>
+              </div>
+            </a>
+          </div>
+          {% for product in collection_object.products limit: product_limit %}
+            <div class="grid__item small--one-half medium-up--one-fifth{% if collection_rows == '1' or collection_rows == '3' %} {% if forloop.index == product_index_hide_on_mobile %}small--hide{% endif %}{% endif %}{% if forloop.index == 1%} collection__card--first{% endif %}">
+              {% include 'product-card', product: product, collection: collection_object %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    {% if featured_product_count == 0 %}
+      {% unless onboardingLoaded %}
+        {% comment %}
+          Only load onboarding styles if they have not already been loaded.
+        {% endcomment %}
+        {{ 'theme-onboarding.css' | global_asset_url | stylesheet_tag }}
+        {% assign onboardingLoaded = true %}
+      {% endunless %}
+      <div class="helper-section">
+        <div class="helper-note">
+          <span class="helper-icon"></span>
+          <h3>{{ 'homepage.onboarding.modal_title' | t }}</h3>
+          <p>{{ 'homepage.onboarding.no_featured_products_html' | t }}</p>
+          <p><a href="/admin/collections/new" class="admin-btn-primary">{{ 'homepage.onboarding.add_collection' | t }}</a></p>
+        </div>
+        <div class="grid grid--no-gutters grid--uniform collection small--hide helper-content">
+          <div class="grid__item small--one-half medium-up--one-fifth">
+            <a href="{{ collection_object.url }}" class="collection-card">
+              <div class="collection-card__meta">
+                <p class="h1 collection-card__title">{{ 'homepage.onboarding.collection_title' | t }}</p>
+                <p class="collection-card__subtext">{{ 'collections.general.view_all' | t }}</p>
+              </div>
+            </a>
+          </div>
+          {% for i in (1..9) %}
+            {% case i %}
+              {% when 7 %}
+                {% assign index = 1 %}
+              {% when 8 %}
+                {% assign index = 2 %}
+              {% when 9 %}
+                {% assign index = 3 %}
+              {% else %}
+                {% assign index = i %}
+            {% endcase %}
+            {% capture imageUrl %}//cdn.shopify.com/s/images/themes/product-{{ index }}.png{% endcapture %}
+            <div class="grid__item small--one-half medium-up--one-fifth">
+              {% comment %}
+                Replica of snippets/product-card.liquid
+              {% endcomment %}
+              <a href="#" class="product-card">
+                <div class="product-card__image-wrapper">
+                  <img src="{{ imageUrl }}" alt="{{ product.featured_image.alt | escape }}" class="product-card__image">
+                </div>
+                <div class="product-card__info">
+                  <div class="product-card__name">{{ 'homepage.onboarding.product_title' | t }}</div>
+                  <div class="product-card__price">
+                    $19.99
+                  </div>
+                </div>
+                <div class="product-card__overlay">
+                  {% assign view_string_length = 'products.product.view' | t | size %}
+                  <span class="btn product-card__overlay-btn {% if view_string_length > 8 %} btn--narrow{% endif %}">{{ 'products.product.view' | t }}</span>
+                </div>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endif %}
