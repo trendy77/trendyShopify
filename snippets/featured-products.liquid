@@ -1,0 +1,14 @@
+<!-- /snippets/featured-products.liquid -->
+
+{% if settings.products_featured_collection != blank %}
+  {% if collections[settings.products_featured_collection].products_count != 0 %}
+    <div class="content-block">
+      <h3 class="h6 content-block__title">{{ 'layout.sidebar.featured_products' | t }}</h3>
+      <div class="content-block__no-padding content-block__no-padding--border-top">
+        {% for product in collections[settings.products_featured_collection].products limit: 2 %}
+          {% include 'product-card', product: product %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+{% endif %}

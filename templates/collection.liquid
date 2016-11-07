@@ -1,0 +1,135 @@
+{% paginate collection.products by 20 %}
+
+  <header class="grid medium-up--grid--table section-header small--text-center">
+    <div class="grid__item medium-up--one-half section-header__item">
+      <h1 class="section-header__title">
+        {{ collection.title }}
+        {% if current_tags %}
+          &ndash; {% assign title_tags = current_tags | join: ', ' %}
+          {{ title_tags }}
+        {% endif %}
+      </h1>
+      {% if collection.description != blank %}
+        <div class="section-header__subtext rte">
+          {{ collection.description }}
+        </div>
+      {% endif %}
+    </div>
+    <div class="grid__item medium-up--one-half medium-up--text-right section-header__item">
+      {% if settings.product_tags_enable and collection.all_tags.size > 0 %}
+        <div class="collection-sort">
+          <label for="SortBy" class="collection-sort__label">{{ 'collections.sorting.title_tags' | t }}</label>
+          <select name="SortTags" id="SortTags" class="collection-sort__input">
+            {% if collection.handle %}
+              <option value="/collections/{{ collection.handle }}">{{ 'collections.sorting.all_of_collection' | t }}</option>
+            {% elsif collection.current_type %}
+              <option value="{{ collection.current_type | url_for_type }}">{{ 'collections.sorting.all_of_collection' | t }}</option>
+            {% elsif collection.current_vendor %}
+              <option value="{{ collection.current_vendor | url_for_vendor }}">{{ 'collections.sorting.all_of_collection' | t }}</option>
+            {% endif %}
+            {% for tag in collection.all_tags %}
+              <option value="/collections/{% if collection.handle != blank %}{{ collection.handle }}{% else %}all{% endif %}/{{ tag | handleize }}"{% if current_tags contains tag %} selected="selected"{% endif %}>{{ tag }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      {% endif %}
+      {% if settings.product_sorting_enable %}
+        <div class="collection-sort">
+          <label for="SortBy" class="collection-sort__label">{{ 'collections.sorting.title' | t }}</label>
+          <select name="SortBy" id="SortBy" data-default-sort="{{ collection.default_sort_by }}" class="collection-sort__input">
+            <option value="manual">{{ 'collections.sorting.featured' | t }}</option>
+            <option value="best-selling">{{ 'collections.sorting.best_selling' | t }}</option>
+            <option value="title-ascending">{{ 'collections.sorting.az' | t }}</option>
+            <option value="title-descending">{{ 'collections.sorting.za' | t }}</option>
+            <option value="price-ascending">{{ 'collections.sorting.price_ascending' | t }}</option>
+            <option value="price-descending">{{ 'collections.sorting.price_descending' | t }}</option>
+            <option value="created-descending">{{ 'collections.sorting.date_descending' | t }}</option>
+            <option value="created-ascending">{{ 'collections.sorting.date_ascending' | t }}</option>
+          </select>
+        </div>
+      {% endif %}
+    </div>
+  </header>
+
+  <div class="grid grid--no-gutters grid--uniform">
+
+    {% for product in collection.products %}
+      <div class="grid__item small--one-half medium-up--one-fifth">
+        {% include 'product-card', product: product %}
+      </div>
+    {% else %}
+      {% comment %}
+        Add default products to help with onboarding for collections/all only.
+
+        The onboarding styles and products are only loaded if the
+        store has no products.
+      {% endcomment %}
+      {% if shop.products_count == 0 %}
+        {% unless onboardingLoaded %}
+          {% comment %}
+            Only load onboarding styles if they have not already been loaded.
+          {% endcomment %}
+          {{ 'theme-onboarding.css' | global_asset_url | stylesheet_tag }}
+          {% assign onboardingLoaded = true %}
+        {% endunless %}
+        <div class="grid__item">
+          <div class="helper-section">
+            <div class="helper-note">
+              <span class="helper-icon"></span>
+              <h3>{{ 'collections.onboarding.modal_title' | t }}</h3>
+              <p>{{ 'collections.onboarding.no_products_html' | t }}</p>
+              <p><a href="/admin/products/new" class="admin-btn-primary">{{ 'collections.onboarding.add_product' | t }}</a></p>
+            </div>
+
+            <div class="grid grid--no-gutters grid--uniform helper-content">
+              {% assign collection_index = 1 %}
+              {% for i in (1..8) %}
+                {% case i %}
+                  {% when 7 %}
+                    {% assign collection_index = 1 %}
+                  {% when 8 %}
+                    {% assign collection_index = 2 %}
+                {% endcase %}
+                <div class="grid__item small--one-half medium-up--one-fifth">
+                  <a href="/admin/products" class="product-card">
+                    <div class="product-card__image-wrapper">
+                      {% capture imageUrl %}//cdn.shopify.com/s/images/themes/product-{{ collection_index }}.png{% endcapture %}
+                      <div class="product-card__image">
+                        {{ imageUrl | img_tag }}
+                      </div>
+                    </div>
+                    <div class="product-card__info">
+                      <div class="product-card__name">{{ 'homepage.onboarding.product_title' | t }}</div>
+                      <div class="product-card__price">
+                        $19.99
+                      </div>
+                    </div>
+                    <div class="product-card__overlay">
+                      {% assign view_string_length = 'products.product.view' | t | size %}
+                      <span class="btn product-card__overlay-btn {% if view_string_length > 8 %} btn--narrow{% endif %}">{{ 'products.product.view' | t }}</span>
+                    </div>
+                  </a>
+                </div>
+                {% assign collection_index = collection_index | plus: 1 %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% else %}
+        {% comment %}
+          If collection exists but is empty, display message
+        {% endcomment %}
+        <div class="grid__item small--text-center">
+          <p>{{ 'collections.general.no_matches' | t }}</p>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% if paginate.pages > 1 %}
+    <div class="pagination">
+      {{ paginate | default_pagination | replace: '&laquo; Previous', '&larr;' | replace: 'Next &raquo;', '&rarr;' }}
+    </div>
+  {% endif %}
+
+{% endpaginate %}
